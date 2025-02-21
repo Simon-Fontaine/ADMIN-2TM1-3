@@ -1,4 +1,4 @@
-# Sécurisation d'un VPS Debian avec Docker
+# Sécurisation d'un VPS Debian
 
 ## 1. Initialisation
 
