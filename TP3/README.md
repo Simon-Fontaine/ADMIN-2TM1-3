@@ -231,3 +231,10 @@ Docker modifie directement les règles iptables pour le mapping des ports, ce qu
   sudo ufw status
   sudo ufw-docker status
   ```
+
+## 8. Sources
+
+- <https://help.ovhcloud.com/csm/fr-vps-security-tips?id=kb_article_view&sysparm_article=KB0047708#aller-plus-loin>
+- <https://help.ovhcloud.com/csm/fr-dedicated-servers-creating-ssh-keys?id=kb_article_view&sysparm_article=KB0043385#ajout-de-cles-publiques-supplementaires-a-votre-serveur>
+- <https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-debian-11>
+- <https://github.com/chaifeng/ufw-docker>
