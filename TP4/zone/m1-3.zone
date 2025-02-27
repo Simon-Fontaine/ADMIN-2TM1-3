@@ -1,0 +1,20 @@
+; Zone file for m1-3.ephec-ti.be
+$TTL 86400      ; 1 day
+@       IN      SOA     ns.m1-3.ephec-ti.be. admin.m1-3.ephec-ti.be. (
+                        2023040101      ; serial
+                        21600           ; refresh (6 hours)
+                        3600            ; retry (1 hour)
+                        604800          ; expire (1 week)
+                        86400           ; minimum (1 day)
+                        )
+; Serveurs de noms
+@       IN      NS      ns.m1-3.ephec-ti.be.
+
+; Enregistrements A
+@       IN      A       54.36.181.87
+ns      IN      A       54.36.181.87
+www     IN      A       54.36.181.87
+mail    IN      A       54.36.181.87
+
+; Enregistrement MX pour le serveur mail
+@       IN      MX      10 mail.m1-3.ephec-ti.be.
