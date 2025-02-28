@@ -1,7 +1,7 @@
 ; Zone file for m1-3.ephec-ti.be
 $TTL 86400      ; 1 day
 @       IN      SOA     ns.m1-3.ephec-ti.be. admin.m1-3.ephec-ti.be. (
-                        2023040101      ; serial
+                        2025022801      ; serial
                         21600           ; refresh (6 hours)
                         3600            ; retry (1 hour)
                         604800          ; expire (1 week)
