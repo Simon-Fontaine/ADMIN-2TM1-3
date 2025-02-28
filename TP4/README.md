@@ -240,4 +240,4 @@ delv @localhost www.m1-3.ephec-ti.be
 Testez votre domaine sur [DNSViz](https://dnsviz.net/) pour visualisez la chaîne de confiance DNSSEC.
 
 Résultats:
-![résultats de l'analyse DNSViz](https://github.com/Simon-Fontaine/ADMIN-2TM1-3/tree/main/TP4/m1-3.ephec-ti.be-2025-02-27-21_05_01-UTC.png?raw=true)
+![résultats de l'analyse DNSViz](https://raw.githubusercontent.com/Simon-Fontaine/ADMIN-2TM1-3/refs/heads/main/TP4/m1-3.ephec-ti.be-2025-02-27-21_05_01-UTC.png)
