@@ -21,7 +21,7 @@
    sudo apt install -y ufw fail2ban
    ```
 
-4. **UFW avec Docker**  
+4. **UFW avec Docker** (Optionnel, pas dans le TP)
    Installer et configurer ufw-docker pour gérer le mappage des ports Docker :
    ```bash
    sudo wget -O /usr/local/bin/ufw-docker https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
@@ -216,7 +216,7 @@ Copie manuelle :
    docker compose up -d
    ```
 
-## 7. Gestion des ports avec UFW et Docker
+## 7. Gestion des ports avec UFW et Docker (Optionnel, pas dans le TP)
 
 Docker modifie directement les règles iptables pour le mapping des ports, ce qui peut interférer avec UFW. Pour synchroniser les règles :
 
