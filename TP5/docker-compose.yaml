@@ -1,0 +1,48 @@
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./html:/var/www/html
+      - ./config:/etc/nginx/conf.d
+    depends_on:
+      - php
+      - db
+    restart: unless-stopped
+    networks:
+      - woodytoys-network
+
+  php:
+    container_name: php
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./html/www:/var/www/html/www
+    restart: unless-stopped
+    networks:
+      - woodytoys-network
+
+  db:
+    container_name: db
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: mypass
+      MYSQL_DATABASE: woodytoys
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./woodytoys.sql:/docker-entrypoint-initdb.d/woodytoys.sql
+    restart: unless-stopped
+    networks:
+      - woodytoys-network
+
+networks:
+  woodytoys-network:
+    driver: bridge
+
+volumes:
+  db-data:

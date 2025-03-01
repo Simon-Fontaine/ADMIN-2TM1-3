@@ -409,8 +409,6 @@ docker stop web php db
 
 # Création du fichier docker-compose.yaml
 cat > ~/web/docker-compose.yaml << 'EOF'
-version: '3'
-
 services:
   web:
     container_name: web
