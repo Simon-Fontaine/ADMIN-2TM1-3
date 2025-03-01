@@ -38,7 +38,8 @@ docker stop dns && docker rm dns
 Créez le fichier de configuration principal:
 
 ```bash
-# ~/dns-public/config/named.conf
+# Création du fichier de configuration named.conf
+cat > ~/dns-public/config/named.conf << 'EOF'
 options {
   directory "/var/cache/bind";
   version "not currently available";
@@ -52,12 +53,14 @@ zone "m1-3.ephec-ti.be." {
   file "/etc/bind/m1-3.zone";
   allow-transfer { none; };
 };
+EOF
 ```
 
 Créez le fichier de zone:
 
 ```bash
-# ~/dns-public/zone/m1-3.zone
+# Création du fichier de zone
+cat > ~/dns-public/zone/m1-3.zone << 'EOF'
 ; Zone file for m1-3.ephec-ti.be
 $TTL 86400      ; 1 day
 @       IN      SOA     ns.m1-3.ephec-ti.be. admin.m1-3.ephec-ti.be. (
@@ -78,6 +81,7 @@ mail    IN      A       54.36.181.87    ; Serveur mail
 
 ; Enregistrement MX
 @       IN      MX      10 mail.m1-3.ephec-ti.be.
+EOF
 ```
 
 ### 2.3 Validation de la configuration
@@ -101,8 +105,9 @@ dig @localhost www.m1-3.ephec-ti.be
 
 ### 2.4 Création de l'image personnalisée
 
-```dockerfile
-# ~/dns-public/Dockerfile
+```bash
+# Création du Dockerfile
+cat > ~/dns-public/Dockerfile << 'EOF'
 FROM internetsystemsconsortium/bind9:9.18
 
 COPY config/named.conf /etc/bind/named.conf
@@ -114,6 +119,7 @@ EXPOSE 53/udp 53/tcp
 
 ENTRYPOINT ["/usr/sbin/named"]
 CMD ["-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
+EOF
 ```
 
 ```bash
@@ -139,12 +145,17 @@ docker run -d --name=dns \
 
 ### 3.1 Resource Records pour la délégation
 
-Envoyer par email à Mme Van Den Schrieck:
+Créez un fichier avec les informations de délégation:
 
 ```bash
+# Création du fichier de délégation
+cat > ~/dns-public/delegation_records.txt << 'EOF'
 m1-3    IN    NS    ns.m1-3.ephec-ti.be.
 ns.m1-3 IN    A     54.36.181.87
+EOF
 ```
+
+Envoyez ce fichier par email à Mme Van Den Schrieck.
 
 ### 3.2 Vérification de la délégation
 
@@ -166,16 +177,27 @@ Résultats: <https://www.zonemaster.net/en/result/1f0f05858303f3fa>
 
 ### 4.1 Activation de DNSSEC
 
-Modifiez votre fichier named.conf:
+```bash
+# Mise à jour du fichier named.conf pour activer DNSSEC
+cat > ~/dns-public/config/named.conf << 'EOF'
+options {
+  directory "/var/cache/bind";
+  version "not currently available";
+  allow-query { any; };
+  allow-query-cache { none; };
+  recursion no;
+};
 
-```diff
 zone "m1-3.ephec-ti.be." {
   type master;
-+ inline-signing yes;
-+ dnssec-policy default;
+  inline-signing yes;
+  dnssec-policy default;
   file "/etc/bind/m1-3.zone";
-  allow-transfer { none; };
+  allow-transfer {
+    none;
+  };
 };
+EOF
 ```
 
 ### 4.2 Déploiement de la configuration DNSSEC
