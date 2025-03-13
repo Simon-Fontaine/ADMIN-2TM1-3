@@ -1,0 +1,56 @@
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./html:/var/www/html
+      - ./config/nginx.conf:/etc/nginx/nginx.conf
+      - letsencrypt:/etc/letsencrypt
+    depends_on:
+      - php
+    restart: unless-stopped
+    networks:
+      - dmz
+
+  php:
+    container_name: php
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./html/www:/var/www/html/www
+    restart: unless-stopped
+    networks:
+      - dmz
+      - db_net
+    env_file: 
+      - db.env
+
+  db:
+    container_name: db
+    image: mariadb:11.1
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./woodytoys.sql:/docker-entrypoint-initdb.d/woodytoys.sql
+      - ./db/my-resolve.cnf:/etc/mysql/conf.d/my-resolve.cnf
+    env_file:
+      - db/root.env
+      - db.env
+    restart: unless-stopped
+    networks:
+      - db_net
+
+networks:
+  dmz:
+    driver: bridge
+  db_net:
+    driver: bridge
+
+volumes:
+  db-data:
+  letsencrypt:
