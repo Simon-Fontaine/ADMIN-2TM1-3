@@ -2,5 +2,6 @@
 
 ## Membres
 
+- BRAZIER Antoine
 - DREWNOWSKA Patrycja
 - FONTAINE Simon
