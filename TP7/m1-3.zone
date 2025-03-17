@@ -1,0 +1,43 @@
+; Zone file for m1-3.ephec-ti.be
+$TTL 86400      ; 1 day
+@       IN      SOA     ns.m1-3.ephec-ti.be. admin.m1-3.ephec-ti.be. (
+                        2025031401      ; serial (YYYYMMDD + version)
+                        21600           ; refresh (6h)
+                        3600            ; retry (1h)
+                        1209600         ; expire (14d)
+                        3600            ; minimum (1h)
+                        )
+; Serveurs de noms
+@       IN      NS      ns.m1-3.ephec-ti.be.
+
+; Enregistrements A
+@       IN      A       54.36.181.87
+ns      IN      A       54.36.181.87
+www     IN      A       54.36.181.87
+mail    IN      A       54.36.181.87
+blog    IN      A       54.36.181.87
+
+; Challenge Let's Encrypt
+_acme-challenge IN TXT "TSp9x8JFmLa1MtSNWIdcPF_AEDhHDbUt7bj8O0IjVko"
+
+; Enregistrement MX
+@       IN      MX      10 mail.m1-3.ephec-ti.be.
+
+; Enregistrement SPF (optimisé)
+@       IN      TXT     "v=spf1 mx ip4:54.36.181.87 -all"
+
+; Enregistrement DKIM
+mail._domainkey IN      TXT     ( "v=DKIM1; h=sha256; k=rsa; "
+          "p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2EAp9mXps45BVFRkAxjnB4CAChooVH2YNCah+jaX1JE+Ih75vAxcncHAAkXCAg5dcngB/CsoJJXo8ihvWXR4umW35OZV7X6LYKRyggZtF47Oum207LFUIex7tlScXhsGUCKpsG+9E548WBl5GoLKFHQlH5/97tXrOWWmhPJpXkjbVinheIFzTBgEO/x3iPw/B0ghigvbtWITfj"
+          "PsuKmiLTivJ/6q6rQxiZQ3t9898p1p/nLsZEq3XmniJDHv4OFOYWmPMeoKHbGjVSfCjbalPghsOej81n2kJGGL/Yox7TqWwzTRytZiG8aD6MdCq1qlRyh5WcXlr3IdanObMynuCQIDAQAB" )
+
+; Enregistrement DMARC
+_dmarc  IN      TXT     "v=DMARC1; p=quarantine; sp=quarantine; adkim=s; aspf=s; pct=100; fo=1; rf=afrf; ri=86400; rua=mailto:postmaster@m1-3.ephec-ti.be; ruf=mailto:postmaster@m1-3.ephec-ti.be"
+
+; Enregistrements CAA
+@       IN      CAA     0 issue "letsencrypt.org"
+@       IN      CAA     0 issuewild "letsencrypt.org"
+@       IN      CAA     0 iodef "mailto:admin@m1-3.ephec-ti.be"
+
+; Enregistrements TXT
+@       IN      TXT     "v=TLSRPTv1; rua=mailto:admin@m1-3.ephec-ti.be"
