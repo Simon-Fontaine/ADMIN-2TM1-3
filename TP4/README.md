@@ -264,3 +264,41 @@ Testez votre domaine sur [DNSViz](https://dnsviz.net/) pour visualisez la chaîn
 Résultats:
 
 ![résultats de l'analyse DNSViz](https://raw.githubusercontent.com/Simon-Fontaine/ADMIN-2TM1-3/refs/heads/main/TP4/m1-3.ephec-ti.be-2025-02-27-21_05_01-UTC.png)
+
+
+### 5 Mise en place d'un DNS secondaire
+
+## 5.1 Sur le serveur primaire
+
+Il faut tout d'abord modifier le fichier `named.conf` qu'on a créer plus tôt. Il faut y indiquer les adresses ip du DNS secondaire. 
+
+
+## 5.2 Sur le serveur secondaire
+
+Pour créer un DNS secondaire, il faut créer un fichier `named.conf`. Ce fichier doit être configuré en tant que slave et pour le relier au DNS primaire il faut indiquer l'adresse IP du VPS où se trouve le DNS primaire.
+
+```bash
+options {
+  directory "/var/cache/bind";
+  version "not currently available";
+  allow-query { any; };
+  allow-query-cache { none; };
+  recursion no;
+  listen-on-v6 { any; };
+  dnssec-validation auto;
+};
+
+zone "m1-3.ephec-ti.be." {
+  type slave;
+  file "/var/cache/bind/m1-3.zone";
+  masters {
+    54.36.181.87;  # IPv4 du primaire
+    2001:41d0:302:2200::5e83;  # IPv6 du primaire
+  };
+  inline-signing no;
+};
+```
+
+
+
+
