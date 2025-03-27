@@ -266,9 +266,9 @@ Résultats:
 ![résultats de l'analyse DNSViz](https://raw.githubusercontent.com/Simon-Fontaine/ADMIN-2TM1-3/refs/heads/main/TP4/m1-3.ephec-ti.be-2025-02-27-21_05_01-UTC.png)
 
 
-### 5 Mise en place d'un DNS secondaire
+# 5 Mise en place d'un DNS secondaire
 
-## 5.1 Sur le serveur primaire
+### 5.1 Sur le serveur primaire
 
 Pour que les 2 DNS communiquent ensemble, il faut modifier le fichier de configuration `named.conf`, que nous avons créé précédemment pour faire cela il faut indiquer les adresses IPv4 et IPv6 du serveur secondaire.
 
@@ -364,7 +364,7 @@ docker build -t dns-woodytoys .
 docker run -d --name=dns --network=host --restart=unless-stopped dns-woodytoys
 ```
 
-## 5.2 Sur le serveur secondaire
+### 5.2 Sur le serveur secondaire
 
 Pour créer un DNS secondaire, il faut créer un fichier `named.conf`. Ce fichier doit être configuré en tant que slave et pour le relier au DNS primaire il faut indiquer l'adresse IP du VPS où se trouve le DNS primaire.
 
@@ -412,7 +412,7 @@ docker build -t dns-secondaire .
 docker run -d --name=dns-secondaire --network=host --restart=unless-stopped dns-secondaire
 ```
 
-## 5.2 Mise à jour de la délégation DNS
+### 5.2 Mise à jour de la délégation DNS
 
 Dans la zone parente `ephec-ti.be`, il faut maintenant mettre à jour les enregistrements DNS.
 
