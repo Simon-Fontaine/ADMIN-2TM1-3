@@ -270,8 +270,99 @@ Résultats:
 
 ## 5.1 Sur le serveur primaire
 
-Il faut tout d'abord modifier le fichier `named.conf` qu'on a créer plus tôt. Il faut y indiquer les adresses ip du DNS secondaire. 
+Pour que les 2 DNS communiquent ensemble, il faut modifier le fichier de configuration `named.conf`, que nous avons créé précédemment pour faire cela il faut indiquer les adresses IPv4 et IPv6 du serveur secondaire.
 
+```bash
+options {
+  directory "/var/cache/bind";
+  version "not currently available";
+  allow-query { any; };
+  allow-query-cache { none; };
+  recursion no;
+  listen-on-v6 { any; };
+};
+
+zone "m1-3.ephec-ti.be." {
+  type master;
+  inline-signing yes;
+  dnssec-policy default;
+  file "/etc/bind/m1-3.zone";
+  allow-transfer {
+    54.36.182.168; # IP du serveur secondaire
+    2001:41d0:302:2200::5ec2; # IPv6 du serveur secondaire
+  };
+  also-notify {
+    54.36.182.168; # IP du serveur secondaire
+    2001:41d0:302:2200::5ec2; # IPv6 du serveur secondaire
+  };
+};
+```
+
+
+Il faut ensuite modifier le fichier de zone afin d'y inclure les adresses IPv4 et IPv6 du serveur DNS secondaire.
+
+```bash
+; Zone file for m1-3.ephec-ti.be
+$TTL 86400      ; 1 day
+@       IN      SOA     ns.m1-3.ephec-ti.be. admin.m1-3.ephec-ti.be. (
+                        2025032601      ; serial (YYYYMMDD + version)
+                        21600           ; refresh (6h)
+                        3600            ; retry (1h)
+                        1209600         ; expire (14d)
+                        3600            ; minimum (1h)
+                        )
+; Serveurs de noms
+@       IN      NS      ns.m1-3.ephec-ti.be.
+@       IN      NS      ns2.m1-3.ephec-ti.be.
+
+; Enregistrements A
+@       IN      A       54.36.181.87
+ns      IN      A       54.36.181.87
+ns2     IN      A       54.36.182.168
+www     IN      A       54.36.181.87
+mail    IN      A       54.36.181.87
+blog    IN      A       54.36.181.87
+
+; Enregistrements AAAA (IPv6)
+@       IN      AAAA    2001:41d0:302:2200::5e83
+ns      IN      AAAA    2001:41d0:302:2200::5e83
+ns2     IN      AAAA    2001:41d0:302:2200::5ec2
+www     IN      AAAA    2001:41d0:302:2200::5e83
+mail    IN      AAAA    2001:41d0:302:2200::5e83
+blog    IN      AAAA    2001:41d0:302:2200::5e83
+
+; Challenge Let's Encrypt
+_acme-challenge IN TXT "TSp9x8JFmLa1MtSNWIdcPF_AEDhHDbUt7bj8O0IjVko"
+
+; Enregistrement MX
+@       IN      MX      10 mail.m1-3.ephec-ti.be.
+
+; Enregistrement SPF
+@       IN      TXT     "v=spf1 mx ip4:54.36.181.87 ip6:2001:41d0:302:2200::5e83 -all"
+
+; Enregistrement DKIM
+mail._domainkey IN      TXT     ( "v=DKIM1; h=sha256; k=rsa; "
+          "p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2EAp9mXps45BVFRkAxjnB4CAChooVH2YNCah+jaX1JE+Ih75vAxcncHAAkXCAg5dcngB/CsoJJXo8ihvWXR4umW35OZV7X6LYKRyggZtF47Oum207LFUIex7tlScXhsGUCKpsG+9E548WBl5GoLKFHQlH5/97tXrOWWmhPJpXkjbVinheIFzTBgEO/x3iPw/B0ghigvbtWITfj"
+          "PsuKmiLTivJ/6q6rQxiZQ3t9898p1p/nLsZEq3XmniJDHv4OFOYWmPMeoKHbGjVSfCjbalPghsOej81n2kJGGL/Yox7TqWwzTRytZiG8aD6MdCq1qlRyh5WcXlr3IdanObMynuCQIDAQAB" )
+
+; Enregistrement DMARC
+_dmarc  IN      TXT     "v=DMARC1; p=quarantine; sp=quarantine; adkim=s; aspf=s; pct=100; fo=1; rf=afrf; ri=86400; rua=mailto:postmaster@m1-3.ephec-ti.be; ruf=mailto:postmaster@m1-3.ephec-ti.be"
+
+; Enregistrements CAA
+@       IN      CAA     0 issue "letsencrypt.org"
+@       IN      CAA     0 issuewild "letsencrypt.org"
+@       IN      CAA     0 iodef "mailto:admin@m1-3.ephec-ti.be"
+
+; Enregistrements TXT
+@       IN      TXT     "v=TLSRPTv1; rua=mailto:admin@m1-3.ephec-ti.be"
+```
+
+Pour finir il faut recréer une nouvelle image et un nouveau conteneur pour le DNS.
+
+```
+docker build -t dns-woodytoys .
+docker run -d --name=dns --network=host --restart=unless-stopped dns-woodytoys
+```
 
 ## 5.2 Sur le serveur secondaire
 
@@ -300,5 +391,38 @@ zone "m1-3.ephec-ti.be." {
 ```
 
 
+Il faut ensuite créer un Dockerfile sur le VPS du deuxième DNS:
 
 
+```bash
+FROM internetsystemsconsortium/bind9:9.18
+
+COPY config/named.conf /etc/bind/named.conf
+RUN chown -R bind:bind /etc/bind/ /var/cache/bind
+EXPOSE 53/udp 53/tcp
+
+ENTRYPOINT ["/usr/sbin/named"]
+CMD ["-g", "-c", "/etc/bind/named.conf", "-u", "bind"]
+```
+
+Pour finir il suffit de créer une nouvelle image de de lancer le conteneur Docker :
+
+```bash
+docker build -t dns-secondaire .
+docker run -d --name=dns-secondaire --network=host --restart=unless-stopped dns-secondaire
+```
+
+## 5.2 Mise à jour de la délégation DNS
+
+Dans la zone parente `ephec-ti.be`, il faut maintenant mettre à jour les enregistrements DNS.
+
+Cette configuration définit `ns.m1-3.ephec-ti.be` comme serveur DNS principal et `ns2.m1-3.ephec-ti.be` comme serveur secondaire :
+
+```bash
+m1-3    IN    NS    ns.m1-3.ephec-ti.be.
+m1-3    IN    NS    ns2.m1-3.ephec-ti.be.
+ns.m1-3 IN    A     54.36.181.87
+ns.m1-3 IN    AAAA  2001:41d0:302:2200::5e83
+ns2.m1-3 IN    A     54.36.182.168
+ns2.m1-3 IN    AAAA  2001:41d0:302:2200::5ec2
+```
