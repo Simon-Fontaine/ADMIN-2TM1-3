@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+  db:
+    image: simonschool/woody_database:latest
+    environment:
+      - MYSQL_DATABASE=woody
+      - MYSQL_ROOT_PASSWORD=pass
+    volumes:
+      - db-data:/var/lib/mysql
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  api:
+    image: simonschool/woody_api:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == worker
+
+  front:
+    image: simonschool/woody_front:latest
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  reverse:
+    image: simonschool/woody_rp:latest
+    ports:
+      - "80:8080"
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - front
+      - api
+
+networks:
+  default:
+    driver: overlay
+
+volumes:
+  db-data:
