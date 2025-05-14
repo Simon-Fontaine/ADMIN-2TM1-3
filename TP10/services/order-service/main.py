@@ -83,7 +83,7 @@ def create_order():
         except Exception as inner_e:
             return f"Error creating order: {str(inner_e)}", 500
 
-@app.route('/api/orders/', methods=['GET'])
+@app.route('/api/orders', methods=['GET'])
 def get_order():
     try:
         order_id = request.args.get('order_id')

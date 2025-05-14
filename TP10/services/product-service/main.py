@@ -39,10 +39,6 @@ def add_product():
         print(f"Error adding product: {e}")
         return f"Error adding product: {str(e)}", 500
 
-@app.route('/api/products/<int:product_id>', methods=['GET'])
-def get_product(product_id):
-    return "not yet implemented"
-
 @app.route('/api/products/last', methods=['GET'])
 @cache_result(ttl=15)
 def get_last_product():
