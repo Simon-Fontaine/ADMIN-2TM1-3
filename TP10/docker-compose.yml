@@ -1,0 +1,84 @@
+services:
+  db:
+    build: ./services/database
+    restart: always
+    environment:
+      - MYSQL_DATABASE=woody
+      - MYSQL_ROOT_PASSWORD=pass
+    volumes:
+      - db-data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  misc-service:
+    build: ./services/misc-service
+    restart: always
+    depends_on:
+      - db
+      - redis
+
+  product-service:
+    build: ./services/product-service
+    restart: always
+    depends_on:
+      - db
+      - redis
+
+  order-service:
+    build: ./services/order-service
+    restart: always
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+
+  order-worker:
+    build: 
+      context: ./services/order-service
+      dockerfile: Dockerfile.worker
+    restart: always
+    depends_on:
+      - db
+      - rabbitmq
+
+  front:
+    build: ./services/front
+
+  reverse:
+    build: ./services/reverse-proxy
+    ports:
+      - "80:8080"
+    depends_on:
+      - front
+      - misc-service
+      - product-service
+      - order-service
+
+volumes:
+  db-data:
+  rabbitmq-data:
+  redis-data:
