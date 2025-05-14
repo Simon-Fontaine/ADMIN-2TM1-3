@@ -20,8 +20,8 @@ services:
     image: rabbitmq:3-management
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "15672:15672"
+    # ports:
+    #   - "15672:15672"
     deploy:
       replicas: 1
       placement:
